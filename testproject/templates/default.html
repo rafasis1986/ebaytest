@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="Rafael Torres">
+		<title>{{ title }}</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" href="dist/css/jquery.treegrid.css">
+		<link rel="stylesheet" href="dist/css/template.css">
+		<link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/default.min.css">
+		
+    </head>
+    <body>
+        <div class="container-fluid">
+            <div class="col-sm-6 col-sm-offset-3">
+                <h3>{{name}}</h3>
+                </br>
+            </div>
+            
+            <div class="col-sm-10 col-sm-offset-1">
+                <table class="table tree table-bordered table-striped table-condensed">
+		        <thead>
+		            <th width="20%">Id</th>
+		            <th width="50%">Name</th>
+		            <th width="10%">Level</th>
+		            <th>Best Offer Enabled</th>
+		        </thead>
+		        <tbody>
+                  {% set flag = true %}
+		          {% for node in stack %}
+                    {% if flag %}
+                        <tr class="treegrid-{{ node.id}}">
+                        {% set flag = false %}
+                    {% else %}
+                        <tr class="treegrid-{{ node.id}} treegrid-parent-{{ node.parent_id }}">    
+                    {% endif %}
+                        <td>{{ node.id }}</td>
+                        <td>{{node.name}}</td>
+		                <td>{{node.level}}</td>
+		                <td>
+		                {% if node.best_offer %} 
+	                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+	                    {% endif %}
+		                </td>
+		            </tr>
+                  {% endfor %}
+		           
+		        </tbody>
+		            </table>
+		    
+		       
+		    </div><!-- col-sm-10 col-sm-offset-1"-->
+        </div><!-- container-fluid -->
+    
+        <footer>
+			<div class="col-sm-12">
+			    <div class="col-sm-3 col-sm-offset-9">
+			    <p class="text-muted credit">By <a href="https://github.com/rafasis1986">Rafael Torres</a> to <a href="http://vincuventas.com">Vincuventas</a>.</p>
+			    </div>
+			</div>
+        </footer>
+    </body>
+    <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script type="text/javascript" src="dist/js/jquery.treegrid.min.js"></script>
+	<script type="text/javascript" src="dist/js/jquery.treegrid.bootstrap3.js"></script>
+	<script type="text/javascript">
+	    $(document).ready(function() {
+	        $('.tree').treegrid();
+	    });
+	</script>
+</html>

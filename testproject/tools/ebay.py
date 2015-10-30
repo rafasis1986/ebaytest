@@ -12,6 +12,7 @@ from sqlalchemy.orm.session import Session
 from constants import XML_FILE
 from models import Category
 from tools.constants import DB_FILE
+from tools.html import makeHtmlFile
 import xml.etree.ElementTree as ET
 
 
@@ -83,6 +84,10 @@ def bulkCategories(engine):
     session.commit()
 
 
+def clearStack():
+    CATEGORY_STACK = list()
+
+
 def getTreeCategory(category_id):
     engine = create_engine('sqlite:///%s' % DB_FILE)
     session = Session(engine)
@@ -91,6 +96,6 @@ def getTreeCategory(category_id):
     if node is None:
         print("No category with ID: %s" % str(category_id))
     else:
+        clearStack()
         makeChildrenStack(node)
-        while len(CATEGORY_STACK) > 0:
-            print(CATEGORY_STACK.pop())
+        makeHtmlFile(CATEGORY_STACK)

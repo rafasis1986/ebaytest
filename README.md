@@ -21,9 +21,11 @@ $ pip install -r requirements.txt
 Run Script
 =============================
 
-$ python testproject/__main__.py #OPTIONS
+Into 'testproject' folder run:
+
+$ python main.py #OPTIONS
 
 or
 
-$ ./testproject/__main__.py #OPTIONS
+$ ./main.py #OPTIONS
  

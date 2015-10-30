@@ -4,10 +4,10 @@ Created on Oct 30, 2015
 
 @author: rtorres
 '''
-from __main__ import main
+from main import main
 from sys import argv
 import sys
 
 
-if __name__ == '__main__':
+if __name__ == 'main':
     main(sys.argv)

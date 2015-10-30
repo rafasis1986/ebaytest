@@ -63,3 +63,6 @@ target/
 
 # SQLite3 database files:
 *.db
+
+# Categories Xml file
+testproject/categories.xml

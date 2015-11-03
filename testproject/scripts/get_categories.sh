@@ -9,7 +9,7 @@ curl -s 'https://api.sandbox.ebay.com/ws/api.dll'\
  -H 'X-EBAY-API-COMPATIBILITY-LEVEL: 861'\
  --data '<?xml version="1.0" encoding="utf-8"?>
 <GetCategoriesRequest xmlns="urn:ebay:apis:eBLBaseComponents">
-  <CategoryParent>34</CategoryParent>
+  <CategoryParent>10542</CategoryParent>
   <CategorySiteID>0</CategorySiteID>
   <ViewAllNodes>True</ViewAllNodes>
   <DetailLevel>ReturnAll</DetailLevel>

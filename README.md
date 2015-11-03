@@ -29,3 +29,11 @@ or
 
 $ ./main.py #OPTIONS
  
+
+Customize Shell Script
+=============================
+
+To change the shell script to get the ebay categories you use the shell script
+file 'get_categories.sh' into folder "testproject/scripts"
+
+ 

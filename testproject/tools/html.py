@@ -15,6 +15,6 @@ def makeHtmlFile(stack):
                          trim_blocks=True)
     with open("%s.html" % root.id, "wb") as fh:
         fh.write(j2_env.get_template('default.html'). \
-                 render(title="Category %s" % root.id,
-                        stack=stack,
-                        name=root.name,))
+             render(title="Category %s" % root.id,
+                    stack=stack,
+                    name=root.name,).encode('utf-8'))

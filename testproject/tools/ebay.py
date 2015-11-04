@@ -33,11 +33,19 @@ def getCategoryTree(root):
     for child in root:
         if 'CategoryArray' in child.tag:
             for category in child:
-                best_offer = bool(category[0].text)
-                cat_id = int(category[2].text)
-                level = int(category[3].text)
-                name = category[4].text
-                name = name.encode("ascii", "ignore")
+                best_offer = False
+                cat_id = -1
+                level = 1
+                name = ''
+                for item in category:
+                        if 'BestOfferEnabled' in item.tag:
+                            best_offer = bool(item.text)
+                        elif 'CategoryID' in item.tag:
+                            cat_id = int(item.text)
+                        elif 'CategoryLevel' in item.tag:
+                            level = int(item.text)
+                        elif 'CategoryName' in item.tag:
+                            name = unicode(item.text)
                 if flag:
                     rootTree = Category(cat_id=cat_id, name=name,
                                         best_offer=best_offer, level=level)
@@ -65,12 +73,12 @@ def dropCategories(session):
         session.commit()
 
 
-def makeChildrenStack(node):
+def makeChildrenStack(node, stack=[]):
     children = [item for item in node.children]
     children.sort(reverse=True)
     for index in children:
-        makeChildrenStack(node.children[index])
-    CATEGORY_STACK.append(node)
+        makeChildrenStack(node.children[index], stack)
+    stack.append(node)
 
 
 def bulkCategories(engine):
@@ -84,18 +92,14 @@ def bulkCategories(engine):
     session.commit()
 
 
-def clearStack():
-    CATEGORY_STACK = list()
-
-
 def getTreeCategory(category_id):
     engine = create_engine('sqlite:///%s' % DB_FILE)
     session = Session(engine)
     node = session.query(Category).\
         filter(Category.id == category_id).first()
+    stack = list()
     if node is None:
         print("No category with ID: %s" % str(category_id))
     else:
-        clearStack()
-        makeChildrenStack(node)
-        makeHtmlFile(CATEGORY_STACK)
+        makeChildrenStack(node, stack)
+        makeHtmlFile(stack)

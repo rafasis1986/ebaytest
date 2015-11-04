@@ -10,7 +10,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.scoping import scoped_session
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.schema import Column, ForeignKey
-from sqlalchemy.sql.sqltypes import Integer, String, Boolean
+from sqlalchemy.sql.sqltypes import Integer, String, Boolean, Unicode
 
 
 DBSession = scoped_session(sessionmaker())
@@ -21,7 +21,7 @@ class Category(Base):
     __tablename__ = 'category'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(Unicode, index=True)
     level = Column(Integer, default=1)
     best_offer = Column(Boolean)
     parent_id = Column(Integer, ForeignKey(id))

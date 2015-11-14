@@ -38,6 +38,10 @@ class BaseDao(object):
         assert(dbfile is not None or conn is not None)
         assert(isolation_level is None or (isolation_level in _ISOLATION_LEVELS \
                                            and commit_interval >= 1))
+        try:
+            FileNotFoundError
+        except NameError:
+            FileNotFoundError = IOError
         self.dbfile = dbfile
         self.conn = conn
         self.return_type = return_type
@@ -51,7 +55,7 @@ class BaseDao(object):
             try:
                 with open(sql_file) as f:
                     self.sql = ' \n'.join([line.strip() for line in f])
-            except IOError as e:
+            except FileNotFoundError:
                 raise SimpleOrmException(_ERROR_01.format(sql_file, type(self).__name__, sql_file_dir))
 
     def execute(self, param):

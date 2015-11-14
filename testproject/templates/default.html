@@ -28,13 +28,11 @@
 		            <th>Best Offer Enabled</th>
 		        </thead>
 		        <tbody>
-                  {% set flag = true %}
 		          {% for node in stack %}
-                    {% if flag %}
+                    {% if node.id == node.parent_id %}
                         <tr class="treegrid-{{ node.id}}">
-                        {% set flag = false %}
                     {% else %}
-                        <tr class="treegrid-{{ node.id}} treegrid-parent-{{ node.parent_id }}">    
+                        <tr class="treegrid-{{ node.id}} treegrid-parent-{{ node.parent_id }}">
                     {% endif %}
                         <td>{{ node.id }}</td>
                         <td>{{node.name}}</td>
@@ -49,8 +47,6 @@
 		           
 		        </tbody>
 		            </table>
-		    
-		       
 		    </div><!-- col-sm-10 col-sm-offset-1"-->
         </div><!-- container-fluid -->
     

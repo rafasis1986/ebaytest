@@ -8,7 +8,7 @@ from jinja2.environment import Environment
 from jinja2.loaders import FileSystemLoader
 
 
-def makeHtmlFile(stack):
+def make_html_file(stack):
     root = stack[-1]
     stack.reverse()
     j2_env = Environment(loader=FileSystemLoader('templates'),

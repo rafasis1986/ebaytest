@@ -4,102 +4,86 @@ Created on Oct 28, 2015
 
 @author: rtorres
 '''
+from collections import OrderedDict
 import subprocess
-
-from sqlalchemy.engine import create_engine
-from sqlalchemy.orm.session import Session
 
 from constants import XML_FILE
 from models import Category
+from tools.categoryDao import InsertCategory, DropCategory, SelectCategory, \
+    SelectCategoriesChildren, CreateCategory, CreateCategoryIndex, \
+    CreateCategoryParentIndex
 from tools.constants import DB_FILE
-from tools.html import makeHtmlFile
+from tools.html import make_html_file
 import xml.etree.ElementTree as ET
 
 
-CATEGORY_STACK = list()
-
-
-def getEbayCategories():
+def get_ebay_categories():
     return subprocess.call("scripts/get_categories.sh > %s" % XML_FILE,
                            shell=True)
 
 
-def getCategoryTree(root):
+def get_category_list(root):
     categories = list()
-    flag = True
-    rootTree = None
-    min_level = 1
-    delta_level = 0
     for child in root:
         if 'CategoryArray' in child.tag:
             for category in child:
-                best_offer = False
-                cat_id = -1
-                level = 1
-                name = ''
                 for item in category:
                         if 'BestOfferEnabled' in item.tag:
                             best_offer = bool(item.text)
                         elif 'CategoryID' in item.tag:
-                            cat_id = int(item.text)
+                            id = int(item.text)
                         elif 'CategoryLevel' in item.tag:
                             level = int(item.text)
                         elif 'CategoryName' in item.tag:
-                            name = unicode(item.text)
-                if flag:
-                    rootTree = Category(cat_id=cat_id, name=name,
-                                        best_offer=best_offer, level=level)
-                    min_level = level
-                    categories.append(rootTree)
-                    flag = False
-                else:
-                    delta_level = level - min_level
-                    if len(categories) > delta_level:
-                        while(len(categories) > delta_level):
-                            categories.pop()
-                    parent = categories[-1]
-                    aux = Category(cat_id=cat_id, name=name,
-                                   best_offer=best_offer, level=level,
-                                   parent=parent)
-                    categories.append(aux)
+                            name = str(item.text)
+                        elif 'CategoryParentID' in item.tag:
+                            parent_id = int(item.text)
+                cat = OrderedDict()
+                cat['id'] = id
+                cat['name'] = name
+                cat['level'] = level
+                cat['best_offer'] = best_offer
+                cat['parent_id'] = parent_id
+                categories.append(cat)
             break
-    return rootTree
+    return categories
 
 
-def dropCategories(session):
-    node = session.query(Category).filter(Category.parent == None).first()
-    if node is not None:
-        session.delete(node)
-        session.commit()
+def drop_all_categories():
+    DropCategory(dbfile=DB_FILE).execute([])
 
 
-def makeChildrenStack(node, stack=[]):
-    children = [item for item in node.children]
-    children.sort(reverse=True)
-    for index in children:
-        makeChildrenStack(node.children[index], stack)
-    stack.append(node)
+def make_children_stack(category, stack=[]):
+    param = OrderedDict()
+    param['parent_id'] = category.id
+    result = SelectCategoriesChildren(dbfile=DB_FILE, return_type=Category).execute(param)
+    result.sort(reverse=True)
+    for catAux in result:
+        make_children_stack(catAux, stack)
+    stack.append(category)
 
 
-def bulkCategories(engine):
-    getEbayCategories()
+def bulk_categories():
+    get_ebay_categories()
     tree = ET.parse(XML_FILE)
     root = tree.getroot()
-    session = Session(engine)
-    dropCategories(session)
-    node = getCategoryTree(root)
-    session.add(node)
-    session.commit()
+    DropCategory(dbfile=DB_FILE).execute([])
+    CreateCategory(dbfile=DB_FILE).execute([])
+    CreateCategoryIndex(dbfile=DB_FILE).execute([])
+    CreateCategoryParentIndex(dbfile=DB_FILE).execute([])
+    categories = get_category_list(root)
+    result = InsertCategory(dbfile=DB_FILE, commit_interval=100,
+                            isolation_level='DEFERRED').execute(categories)
+    return result
 
 
-def getTreeCategory(category_id):
-    engine = create_engine('sqlite:///%s' % DB_FILE)
-    session = Session(engine)
-    node = session.query(Category).\
-        filter(Category.id == category_id).first()
+def make_tree_category(category_id):
     stack = list()
-    if node is None:
+    param = OrderedDict()
+    param['id'] = category_id
+    result = SelectCategory(dbfile='test.db', return_type=Category).execute(param)
+    if len(result) == 0:
         print("No category with ID: %s" % str(category_id))
     else:
-        makeChildrenStack(node, stack)
-        makeHtmlFile(stack)
+        make_children_stack(result.pop(), stack)
+        make_html_file(stack)

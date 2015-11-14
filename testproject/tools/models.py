@@ -5,6 +5,7 @@ Created on Oct 28, 2015
 @author: rtorres
 '''
 
+
 class Category:
     id = None
     name = None

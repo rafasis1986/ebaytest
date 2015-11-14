@@ -4,9 +4,6 @@ Created on Nov 13, 2015
 
 @author: rtorres
 '''
-from collections import OrderedDict
-
-from tools.models import Category
 from tools.simpleorm import BaseDao
 
 
@@ -18,8 +15,7 @@ class CreateCategory(BaseDao):
             best_offer BOOLEAN,
             parent_id INTEGER NOT NULL,
             PRIMARY KEY (id),
-            CHECK (best_offer IN (0, 1)),
-            FOREIGN KEY(parent_id) REFERENCES categories (id)
+            CHECK (best_offer IN (0, 1))
         );"""
 
 
@@ -37,39 +33,17 @@ class DropCategory(BaseDao):
 
 class InsertCategory(BaseDao):
     sql = """INSERT INTO categories (id, name, level, best_offer, parent_id)
-            VALUES (?, ?, ?, ?, ?)"""
+            VALUES (?, ?, ?, ?, ?);"""
+
+
+class SelectCategory(BaseDao):
+    sql = """SELECT *  FROM categories where id=?; """
 
 
 class SelectCategoryAll(BaseDao):
-    sql = "SELECT C.id ,C.name, C.level, c.best_offer, C.parent_id FROM categories C "
+    sql = """SELECT * FROM categories; """
 
 
-if __name__ == '__main__':
-    param = OrderedDict()
-    result = SelectCategoryAll(dbfile='test.db', return_type=Category).execute(param)
-    for elem in result:
-        print(elem.id, elem.name, elem.level, elem.best_offer, elem.parent_id)
-
-#===============================================================================
-# if __name__ == '__main__':
-#     result = DropCategory(dbfile = 'test.db').execute([])
-#     result = CreateCategory(dbfile='test.db').execute([])
-#     result = CreateCategoryIndex(dbfile = 'test.db').execute([])
-#     result = CreateCategoryParentIndex(dbfile = 'test.db').execute([])
-#     print('Rows affected:{}'.format(result))
-#===============================================================================
-#===============================================================================
-# if __name__ == '__main__':
-#     param = list()
-#     for i in range(10000):
-#         elem = OrderedDict()
-#         elem['id'] = i
-#         elem['name'] = '{}'.format(i)
-#         elem['level'] = i%100
-#         elem['best_offer'] = True
-#         elem['parent_id'] = i
-#         param.append(elem)
-# 
-#     result = InsertCategory (dbfile = 'test.db', commit_interval = 100, isolation_level = 'DEFERRED').execute(param)
-#     print('Rows affected:{}'.format(result))
-#===============================================================================
+class SelectCategoriesChildren(BaseDao):
+    sql = """SELECT * FROM categories WHERE parent_id = ? AND id != parent_id
+            ORDER BY name ASC;"""

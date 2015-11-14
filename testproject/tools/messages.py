@@ -6,22 +6,22 @@ Created on Oct 30, 2015
 '''
 
 
-def avaliableSubcomands():
+def avaliable_subcomands():
     print('\nAvailable subcommands:\n')
     print('\t--rebuild')
     print('\t--render #CATEGORY_ID')
     print('')
 
 
-def unknowCommand(arg=''):
+def unknow_command(arg=''):
     print("Unknown command: '%s'" % arg)
     print("Type 'testproject help' for usage.\n")
 
 
-def needCategoryId():
+def need_category_id():
     print("Please submit one category id number.\n")
 
 
-def invalidCategoryId(arg=''):
+def invalid_category_id(arg=''):
     print("Your category id '%s' is in wrong format." % arg)
-    needCategoryId()
+    need_category_id()

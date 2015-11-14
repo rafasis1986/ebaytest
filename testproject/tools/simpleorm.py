@@ -4,9 +4,10 @@ Created on Nov 13, 2015
 
 @author: rtorres
 '''
-import sqlite3
-import re
 from collections import OrderedDict
+import re
+import sqlite3
+
 
 class SimpleOrmException(Exception):
     pass
@@ -15,25 +16,36 @@ _ERROR_01 = "The SQL file {} for the class {} doesn't exist in the directory {} 
 _ERROR_02 = "The column name {} doesn't exist in the class {}."
 _ISOLATION_LEVELS = ['DEFERRED', 'IMMEDIATE', 'EXLUSIVE']
 
+
 class BaseDao(object):
     sql = ''
-    def __init__(self, dbfile = None, conn = None, sql_file_dir = '.', return_type = None, isolation_level = None, commit_interval = -1):
+
+    def __init__(self, dbfile=None, conn=None, sql_file_dir='.',
+                 return_type=None, isolation_level=None, commit_interval=-1):
         '''
         dbfile          : SQLite3 database file path.
         conn            : SQLite3 connection object.
         sql_file_dir    : SQL file root directory.
-        return_type     : If you get return value by certain type, you should set this parameter.
-        isolation_level : If you want to disable auto commit function, you should set this parameter as 'DEFERRED', 'IMMEDIATE', or 'EXCLUSIVE'.
-        commit_interval : If you want to insert or update or delete a lot of data, you should set this parameter appropriately so that it is finished faster than usual.
+        return_type     : If you get return value by certain type, you should
+                        set this parameter.
+        isolation_level : If you want to disable auto commit function, you
+                        should set this parameter as 'DEFERRED', 'IMMEDIATE',
+                        or 'EXCLUSIVE'.
+        commit_interval : If you want to insert or update or delete a lot of
+                        data, you should set this parameter appropriately so
+                        that it is finished faster than usual.
         '''
-        assert(dbfile != None or conn != None)
-        assert(isolation_level == None or (isolation_level in _ISOLATION_LEVELS and commit_interval >= 1))
+        assert(dbfile is not None or conn is not None)
+        assert(isolation_level is None or (isolation_level in _ISOLATION_LEVELS \
+                                           and commit_interval >= 1))
         self.dbfile = dbfile
         self.conn = conn
         self.return_type = return_type
         self.isolation_level = isolation_level
         self.commit_interval = commit_interval
-        self.dao_class_name = '_'.join(filter(lambda x: x != '', re.split('([A-Z][a-z]+)', type(self).__name__))).lower()
+        self.dao_class_name = '_'.join(filter(lambda x: x != '',
+                                              re.split('([A-Z][a-z]+)',
+                                                       type(self).__name__))).lower()
         if self.sql == '':
             sql_file = '{}/{}.sql'.format(sql_file_dir, self.dao_class_name)
             try:
@@ -44,7 +56,7 @@ class BaseDao(object):
 
     def execute(self, param):
         assert(isinstance(param, OrderedDict) or isinstance(param, list))
-        if self.conn == None:
+        if self.conn is None:
             self.conn = sqlite3.connect(self.dbfile)
         with self.conn:
             self.conn.isolation_level = self.isolation_level
@@ -58,7 +70,7 @@ class BaseDao(object):
                     count += 1
                     if count % self.commit_interval == 0:
                         self.conn.commit()
-            else: 
+            else:
                 self.sql = _construct_sql(self.sql, param)
                 self.conn.row_factory = sqlite3.Row
                 cursor = self.conn.cursor()
@@ -66,7 +78,7 @@ class BaseDao(object):
                 cursor.execute(self.sql, t)
                 rows_affected += cursor.rowcount
         if self.dao_class_name.startswith('select'):
-            if self.return_type == None:
+            if self.return_type is None:
                 return cursor.fetchall()
             else:
                 result = []
@@ -78,7 +90,7 @@ class BaseDao(object):
                     for i in range(column_size):
                         column_name = description[i][0].lower()
                         value = row[i]
-                        if not column_name in return_type_members:
+                        if column_name not in return_type_members:
                             raise SimpleOrmException(_ERROR_02.format(column_name, self.return_type.__name__))
                         else:
                             setattr(obj, column_name, value)
@@ -95,19 +107,8 @@ class BaseDao(object):
         else:
             return rows_affected
 
+
 def _construct_sql(sql, param):
-    r'''
-    >>> _construct_sql('SELECT * FROM EMPLOYEE\nWHERE NAME LIKE ?\nif param.get("age", None) != None:\nAND AGE = ?\nend', {'age':20})
-    'SELECT * FROM EMPLOYEE WHERE NAME LIKE ? AND AGE = ?'
-    >>> _construct_sql('SELECT * FROM EMPLOYEE\nWHERE NAME LIKE ?\nif param.get("age", None) != None:\nAND AGE = ?\nend', {'name':'Taro'})
-    'SELECT * FROM EMPLOYEE WHERE NAME LIKE ?'
-    >>> _construct_sql('SELECT * FROM EMPLOYEE\nWHERE NAME LIKE ?\nif param.get("_flg", None) == True:\nAND AGE = ?\nend', {'_flg':True})
-    'SELECT * FROM EMPLOYEE WHERE NAME LIKE ? AND AGE = ?'
-    >>> _construct_sql('SELECT * FROM EMPLOYEE\nWHERE NAME LIKE ?\nif param.get("_flg", None) == True:\nAND AGE = ?\nend', {'_flg':False})
-    'SELECT * FROM EMPLOYEE WHERE NAME LIKE ?'
-    >>> _construct_sql('SELECT * FROM EMPLOYEE\nWHERE NAME LIKE ?\nAND AGE = ?', {})
-    'SELECT * FROM EMPLOYEE WHERE NAME LIKE ? AND AGE = ?'
-    '''
     lines = re.split('\n', sql)
     result = []
     condition = False
@@ -116,17 +117,13 @@ def _construct_sql(sql, param):
         if 'end' in line:
             condition = False
             enable = False
-        elif condition == True and enable == True:
+        elif condition is True and enable is True:
             result.append(line)
         elif 'if' in line:
             condition = True
             l = line.lstrip('if').replace(':', '')
             if eval(l):
                 enable = True
-        elif condition == False:
+        elif condition is False:
             result.append(line)
     return ' '.join(result)
-if __name__ == '__main__':
-    from doctest import testmod
-    testmod()
-

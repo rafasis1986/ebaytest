@@ -35,7 +35,7 @@ def get_category_list(root):
                         elif 'CategoryLevel' in item.tag:
                             level = int(item.text)
                         elif 'CategoryName' in item.tag:
-                            name = str(item.text)
+                            name = unicode(item.text)
                         elif 'CategoryParentID' in item.tag:
                             parent_id = int(item.text)
                 cat = OrderedDict()
@@ -63,7 +63,7 @@ def make_children_stack(category, stack=[]):
 
 
 def bulk_categories():
-    get_ebay_categories()
+    #get_ebay_categories()
     tree = ET.parse(XML_FILE)
     root = tree.getroot()
     DropCategory(dbfile=DB_FILE).execute([])

@@ -57,7 +57,6 @@ def make_children_stack(category, stack=[]):
     param = OrderedDict()
     param['parent_id'] = category.id
     result = SelectCategoriesChildren(dbfile=DB_FILE, return_type=Category).execute(param)
-    result.sort(reverse=True)
     for catAux in result:
         make_children_stack(catAux, stack)
     stack.append(category)

@@ -46,4 +46,4 @@ class SelectCategoryAll(BaseDao):
 
 class SelectCategoriesChildren(BaseDao):
     sql = """SELECT * FROM categories WHERE parent_id = ? AND id != parent_id
-            ORDER BY name ASC;"""
+            ORDER BY name DESC;"""
